@@ -30,7 +30,8 @@ class MediaError(Exception):
 
 
 def emit(kind, **data):
-    print('@@MEDIA ' + json.dumps({'kind': kind, **data}, ensure_ascii=False), flush=True)
+    # ASCII-safe events also work with Windows consoles using non-UTF-8 code pages.
+    print('@@MEDIA ' + json.dumps({'kind': kind, **data}, ensure_ascii=True), flush=True)
 
 
 def error_code(text):

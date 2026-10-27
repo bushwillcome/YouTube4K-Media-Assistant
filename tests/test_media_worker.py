@@ -1,4 +1,5 @@
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
@@ -15,6 +16,14 @@ class ContentTests(unittest.TestCase):
     def setUp(self):
         import media_worker
         self.m = media_worker
+
+    def test_unicode_event_survives_non_utf8_windows_console(self):
+        stream = io.TextIOWrapper(io.BytesIO(), encoding='cp1252', errors='strict')
+        with mock.patch('sys.stdout', stream):
+            self.m.emit('title', text='中文标题')
+        stream.seek(0)
+        event = json.loads(stream.read().removeprefix('@@MEDIA '))
+        self.assertEqual(event['text'], '中文标题')
 
     def track(self, lang, translated=False):
         return [{'ext': 'json3', 'url': 'https://example.invalid/sub?lang=' + lang + ('&tlang=zh' if translated else '')}]
